@@ -379,12 +379,21 @@ async function init() {
 init();
 
 // 🟢 新增：檢視詳細內容視窗
+// 🟢 檢視詳細內容 + 回覆功能
 window.viewTransaction = function (id) {
   const txn = transactions.find((t) => t.id === id);
   if (!txn) return;
 
+  // 1. 準備回覆的 HTML (如果有回覆就顯示，沒有就空著)
+  const replyHtml = txn.reply 
+    ? `<div class="reply-box">
+         <div class="reply-label">💬 刺頭的回覆：</div>
+         <div class="reply-content">${txn.reply}</div>
+       </div>`
+    : "";
+
   Swal.fire({
-    title: txn.title || "無標題", // 標題顯示在最上面
+    title: txn.title || "無標題",
     html: `
       <div style="text-align: left; font-size: 1.1rem; line-height: 1.8;">
         <div style="margin-bottom: 15px; color: #888; font-size: 0.9rem; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
@@ -392,33 +401,58 @@ window.viewTransaction = function (id) {
           🏷️ 類別：<span style="color: ${txn.category_color_hex || '#333'}; font-weight: bold;">${txn.category_name || txn.category}</span>
         </div>
         
-        <div style="
-            background-color: #f9f9f9; 
-            padding: 20px; 
-            border-radius: 15px; 
-            color: #333; 
-            font-weight: 500;
-            white-space: pre-wrap; /* 讓換行符號能正常顯示 */
-            max-height: 60vh;      /* 內容太長時可以捲動 */
-            overflow-y: auto;
-        ">
+        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 15px; color: #333; font-weight: 500; white-space: pre-wrap; margin-bottom: 20px;">
           ${txn.amount} 
         </div>
+
+        ${replyHtml}
       </div>
     `,
-    width: 600, // 視窗寬度設寬一點
+    width: 600,
     showCloseButton: true,
     showConfirmButton: true,
     confirmButtonText: "關閉",
     confirmButtonColor: "#5abf98",
-    // 也可以加一個「編輯」按鈕在檢視視窗裡
+    
+    // 2. 新增回覆按鈕
     showDenyButton: true,
-    denyButtonText: "✏️ 編輯",
+    denyButtonText: "💬 回覆 / 修改",
     denyButtonColor: "#74b9ff",
-  }).then((result) => {
-    // 如果使用者在檢視視窗按了「編輯」
+  }).then(async (result) => {
+    // 3. 如果點了「回覆」按鈕
     if (result.isDenied) {
-      window.editTransaction(id);
+        const { value: text } = await Swal.fire({
+            input: 'textarea',
+            inputLabel: '寫下你的回覆',
+            inputValue: txn.reply || "", // 如果原本有回覆，就帶入原本的內容
+            inputPlaceholder: '例如：哈哈這真的超好笑...',
+            showCancelButton: true,
+            confirmButtonText: "送出回覆",
+            cancelButtonText: "取消"
+        });
+
+        if (text !== undefined) { // 如果有點擊送出 (包含清空)
+            try {
+                // 呼叫後端 API 更新 reply
+                await api(`/api/transactions/${id}`, {
+                    method: "PUT",
+                    body: JSON.stringify({ reply: text })
+                });
+                
+                await loadTransactions(); // 重新讀取資料
+                
+                // 更新成功後，重新打開檢視視窗讓使用者看到結果
+                window.viewTransaction(id);
+                
+                const Toast = Swal.mixin({
+                    toast: true, position: 'top-end', showConfirmButton: false, timer: 3000
+                });
+                Toast.fire({ icon: 'success', title: '回覆已儲存' });
+
+            } catch (error) {
+                Swal.fire("失敗", error.message, "error");
+            }
+        }
     }
   });
 };
