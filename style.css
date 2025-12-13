@@ -431,11 +431,13 @@ input:focus, select:focus {
 .list-container h3 {
   font-size: 1.1rem;
   margin-bottom: 16px;
-  color: #413c36;
-  background-color: #9ca095
-  padding-left: 12px;
-  border-left: 6px solid var(--primary-yellow);
+  color: #040709;
+  background-color: #ebf1df;
+  display: inline-block; 
+  border-radius: 50px;
+  padding: 6px 20px;
   font-weight: 700;
+  line-height: 1.5;
   letter-spacing: 0.5px;
 }
 
