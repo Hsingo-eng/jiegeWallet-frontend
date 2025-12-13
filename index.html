@@ -22,7 +22,8 @@
 
         <section id="landing-section" class="section landing-container">
             <div class="landing-card">
-                <div class="app-logo">🤣</div> <h1>很好笑的<br>好笑紀錄本</h1>
+                <div class="app-logo">🤣</div>
+                <h1>很好笑的<br>好笑紀錄本</h1>
                 <p class="subtitle">刺頭知道密碼嗎？<br>猜猜看(提示：帳號是昕狗 密碼8碼)</p>
                 <button id="go-login-btn" class="btn btn-primary btn-lg">打開</button>
             </div>
@@ -98,27 +99,26 @@
         <form id="swal-txn-form" class="swal-form">
             
             <div class="form-group">
-                <label>日期</label>
-                <input type="date" id="swal-date" class="swal2-input" required>
+                <label>類別</label>
+                <select id="swal-category" class="swal2-select">
+                    <option value="有點好笑">有點好笑</option>
+                    <option value="很好笑">很好笑</option>
+                    <option value="超好笑">超好笑</option>
+                    <option value="笑到歪腰">笑到歪腰</option>
+            </select>
             </div>
 
             <div class="form-group">
                 <label>標題</label>
-                <input type="text" id="swal-title" class="swal2-input" placeholder="例如：午餐發生的事" required>
+                <input type="text" id="swal-title" class="swal2-input" placeholder="標題：例如 加油" required>
             </div>
 
             <div class="form-group">
                 <label>文字敘述</label>
-                <input type="text" id="swal-amount" class="swal2-input" placeholder="例如：笑死我了" required>
+                <input type="text" id="swal-amount" class="swal2-input" placeholder="敘述：例如 不好笑、怎麼改" required>
             </div>
 
-            <div class="form-group" style="display:none;">
-                <select id="swal-category" class="swal2-select">
-                    <option value="一般" selected>一般</option>
-                </select>
-            </div>
-            
-        </form>
+            </form>
     </template>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
