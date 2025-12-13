@@ -713,8 +713,8 @@ div:where(.swal2-container) div:where(.swal2-popup) {
 
 /* 列表中的回覆預覽樣式 */
 .list-reply-preview {
-    background-color: #c2eaff; 
-    color: #555;
+    background-color: #4c5a61; 
+    color: #f6f9eb;
     font-size: 0.9rem;
     
     /* 讓它看起來像是在對話 */

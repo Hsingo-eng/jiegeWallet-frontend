@@ -162,10 +162,10 @@ function renderTransactions() {
         else if (catName === "超好笑") icon = "🤣";
         else if (catName === "笑到歪腰") icon = "🫠";
 
-        // 🟢 檢查是否有回覆
+        // 檢查是否有回覆
         const replyHtml = txn.reply 
           ? `<div class="list-reply-preview">
-               <span style="color:#ff2e63; font-weight:bold;">↳</span> ${txn.reply}
+               <span >👉</span> ${txn.reply}
              </div>` 
           : "";
 
@@ -389,8 +389,8 @@ async function init() {
 
 init();
 
-// 🟢 新增：檢視詳細內容視窗
-// 🟢 檢視詳細內容 + 回覆功能
+// 新增：檢視詳細內容視窗
+// 檢視詳細內容 + 回覆功能
 window.viewTransaction = function (id) {
   const txn = transactions.find((t) => t.id === id);
   if (!txn) return;
@@ -398,7 +398,7 @@ window.viewTransaction = function (id) {
   // 1. 準備回覆的 HTML (如果有回覆就顯示，沒有就空著)
   const replyHtml = txn.reply 
     ? `<div class="reply-box">
-         <div class="reply-label">💬 刺頭的回覆：</div>
+         <div class="reply-label">💬 回覆：</div>
          <div class="reply-content">${txn.reply}</div>
        </div>`
     : "";
@@ -428,7 +428,7 @@ window.viewTransaction = function (id) {
     // 2. 新增回覆按鈕
     showDenyButton: true,
     denyButtonText: "💬 回覆 / 修改",
-    denyButtonColor: "#74b9ff",
+    denyButtonColor: "#a0bddbff",
   }).then(async (result) => {
     // 3. 如果點了「回覆」按鈕
     if (result.isDenied) {
@@ -436,7 +436,7 @@ window.viewTransaction = function (id) {
             input: 'textarea',
             inputLabel: '寫下你的回覆',
             inputValue: txn.reply || "", // 如果原本有回覆，就帶入原本的內容
-            inputPlaceholder: '例如：哈哈這真的超好笑...',
+            inputPlaceholder: '例如：哈哈這真的超好笑',
             showCancelButton: true,
             confirmButtonText: "送出回覆",
             cancelButtonText: "取消"
