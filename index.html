@@ -16,7 +16,7 @@
         rel="stylesheet">
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="style.css?v=popart">
+    <link rel="stylesheet" href="style.css??v=abc">
 </head>
 
 <body>
@@ -68,7 +68,7 @@
             <!-- 帳戶統計 -->
             <div class="bells-card">
                 <div class="budget-main-display" id="budget-section">
-                    <span class="label-lg">本月還能花</span>
+                    <span class="label-lg">好笑事件累積</span>
                     <div class="amount-hero" id="budget-remaining">$0</div>
 
                     <div class="progress-bar-bg">
@@ -80,16 +80,7 @@
                     </div>
                 </div>
 
-                <div class="bell-stats">
-                    <div class="stat-item income">
-                        <span class="label">本月收入</span>
-                        <span id="total-income" class="amount">0</span>
-                    </div>
-                    <div class="stat-item expense">
-                        <span class="label">本月支出</span>
-                        <span id="total-expense" class="amount">0</span>
-                    </div>
-                </div>
+                
             </div>
 
             <!-- 功能按鈕區 -->
@@ -106,7 +97,7 @@
 
             <!-- 交易紀錄 -->
             <div class="list-container">
-                <h3 id="transaction-list-title">11月收支</h3>
+                <h3 id="transaction-list-title">11月</h3>
                 <div id="transaction-list" class="transaction-list">
                     <!-- 動態載入 -->
                 </div>
@@ -122,13 +113,7 @@
                 <label>日期</label>
                 <input type="date" id="swal-date" class="swal2-input" required>
             </div>
-            <div class="form-group">
-                <label>收支</label>
-                <select id="swal-type" class="swal2-select">
-                    <option value="expense">支出</option>
-                    <option value="income">收入</option>
-                </select>
-            </div>
+            
             <div class="form-group">
                 <label>類別</label>
                 <select id="swal-category" class="swal2-select">
@@ -136,7 +121,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>金額</label>
+                <label>說一下吧！</label>
                 <input type="number" id="swal-amount" class="swal2-input" placeholder="多少錢？" min="1" required>
             </div>
             <div class="form-group">
