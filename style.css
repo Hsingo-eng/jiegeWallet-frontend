@@ -1,18 +1,26 @@
 /* ===== CSS Variables ===== */
 :root {
-  --primary-bg: #f0f6e3; /* 柔和的米綠色背景 */
-  --card-bg: #fffdf5; /* 米白卡片 */
-  --text-color: #584c42; /* 深咖啡色文字 */
-  --text-light: #8b7d70; /* 淺一點的文字 */
-  --primary-green: #5abf98; /* 主色綠 */
-  --primary-green-dark: #3a8f70;
-  --primary-blue: #55a4e8; /* 天空藍 */
-  --primary-yellow: #f9d065; /* 金黃色 */
-  --primary-red: #ff7675;
-  --border-color: #e0dacc;
-  --radius: 24px;
-  --shadow: 0 6px 0 rgba(0, 0, 0, 0.05);
+  /* 背景與卡片 */
+  --primary-bg: #fff8e1;        /* 偏黃白底，像漫畫紙 */
+  --card-bg: #ffffff;          /* 純白卡片 */
+
+  /* 文字 */
+  --text-color: #1a1a1a;        /* 幾乎黑色，強烈對比 */
+  --text-light: #444444;
+
+  /* 普普風主色（高飽和） */
+  --primary-red: #ff2e2e;       /* 漫畫紅 */
+  --primary-yellow: #ffd400;    /* 鮮黃 */
+  --primary-blue: #0066ff;      /* 強烈藍 */
+  --primary-green: #00c271;     /* 點綴綠 */
+  --primary-green-dark: #00985a;
+
+  /* 邊框與陰影 */
+  --border-color: #1a1a1a;      /* 黑邊線很重要！ */
+  --radius: 18px;               /* 稍微收斂一點 */
+  --shadow: 6px 6px 0 #1a1a1a;  /* 普普風硬陰影 */
 }
+
 
 /* ===== Reset & Base ===== */
 *, *::before, *::after {
