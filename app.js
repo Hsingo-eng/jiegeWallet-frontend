@@ -321,23 +321,84 @@ async function openAddTransactionModal() {
 
 // 管理類別彈窗 (簡化版)
 async function openManageCategoryModal() {
-  Swal.fire("提示", "目前使用簡易模式，類別請直接在 Google Sheet 修改喔！", "info");
 }
 
 // ===== CRUD Operations =====
-async function createTransaction(payload) {
-  await api("/api/transactions", {
-    method: "POST",
-    body: JSON.stringify({
-      ...payload,
-      id: `txn-${Date.now()}`,
-      // 確保是傳送文字
-      amount: String(payload.amount), 
-      title: String(payload.title),
-      category: String(payload.category)
-    }),
+// 🟢 新功能：顯示類別統計圓餅圖
+async function openCategoryChartModal() {
+  // 1. 先計算每個類別有幾筆
+  // 初始歸零
+  const stats = {
+    "有點好笑": 0,
+    "很好笑": 0,
+    "笑到歪腰": 0
+  };
+
+  // 開始統計
+  transactions.forEach(txn => {
+    // 移除可能的多餘空白
+    const catName = (txn.category_name || "").trim();
+    
+    // 如果這個類別在我們的統計清單內，就 +1
+    if (stats[catName] !== undefined) {
+      stats[catName]++;
+    } else {
+      // 處理舊資料或是未分類的
+      // stats["有點好笑"]++; // 或是你可以選擇不計入
+    }
   });
-  await loadTransactions();
+
+  // 準備數據給圖表
+  const dataValues = [stats["有點好笑"], stats["很好笑"], stats["笑到歪腰"]];
+
+  // 2. 彈出視窗
+  Swal.fire({
+    title: '好笑程度分佈',
+    html: `
+      <div style="position: relative; height: 300px; width: 100%;">
+        <canvas id="myChart"></canvas>
+      </div>
+      <div style="margin-top: 20px; font-size: 0.9rem; color: #666;">
+        目前累積：${transactions.length} 件事
+      </div>
+    `,
+    showConfirmButton: true,
+    confirmButtonText: "關閉",
+    confirmButtonColor: "#5abf98",
+    didOpen: () => {
+      // 3. 等視窗打開後，開始畫圖
+      const ctx = document.getElementById('myChart').getContext('2d');
+      
+      new Chart(ctx, {
+        type: 'pie', // 指定為圓餅圖 (Pie Chart)
+        data: {
+          labels: ['有點好笑', '很好笑', '笑到歪腰'],
+          datasets: [{
+            data: dataValues,
+            backgroundColor: [
+              '#10ac84', // 綠色 (有點好笑)
+              '#54a0ff', // 藍色 (很好笑)
+              '#ff9f43'  // 橘色 (笑到歪腰)
+            ],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom', // 標籤顯示在下面
+              labels: {
+                font: { size: 14 }
+              }
+            }
+          }
+        }
+      });
+    }
+  });
 }
 
 // 編輯交易
@@ -370,7 +431,7 @@ loginForm.addEventListener("submit", async (e) => {
 
 logoutBtn.addEventListener("click", logout);
 btnAddTransaction.addEventListener("click", openAddTransactionModal);
-btnManageCategory.addEventListener("click", openManageCategoryModal);
+btnManageCategory.addEventListener("click", openCategoryChartModal);
 if(budgetSection) budgetSection.addEventListener("click", openBudgetModal);
 
 // ===== Initialize =====
