@@ -611,7 +611,7 @@ div:where(.swal2-container) div:where(.swal2-popup) {
 }
 
 .amount-hero {
-  font-size: 4rem;
+  font-size: 26px;
   font-weight: 700;
   color: var(--primary-green);
   letter-spacing: 0;

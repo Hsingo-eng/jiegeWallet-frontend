@@ -63,7 +63,7 @@
             <div class="bells-card">
                 <div class="budget-main-display" id="budget-section">
                     <span class="label-lg">好笑事件累積</span>
-                    <div class="amount-hero" id="budget-remaining">哈哈哈哈哈</div>
+                    <div class="amount-hero" id="budget-remaining">hahahahaha</div>
 
                     <div class="progress-bar-bg">
                         <div id="budget-progress-bar" class="progress-bar-fill" style="width: 100%"></div>
@@ -99,26 +99,31 @@
         <form id="swal-txn-form" class="swal-form">
             
             <div class="form-group">
+                <label>日期</label>
+                <input type="date" id="swal-date" class="swal2-input" required>
+            </div>
+
+            <div class="form-group">
                 <label>類別</label>
                 <select id="swal-category" class="swal2-select">
                     <option value="有點好笑">有點好笑</option>
                     <option value="很好笑">很好笑</option>
                     <option value="超好笑">超好笑</option>
                     <option value="笑到歪腰">笑到歪腰</option>
-            </select>
+                </select>
             </div>
 
             <div class="form-group">
                 <label>標題</label>
-                <input type="text" id="swal-title" class="swal2-input" placeholder="標題：例如 加油" required>
+                <input type="text" id="swal-title" class="swal2-input" placeholder="標題：例如 午餐吃丹丹" required>
             </div>
 
             <div class="form-group">
-                <label>文字敘述</label>
-                <input type="text" id="swal-amount" class="swal2-input" placeholder="敘述：例如 不好笑、怎麼改" required>
+                <label>內容</label>
+                <input type="text" id="swal-amount" class="swal2-input" placeholder="內容：例如 講了一個冷笑話" required>
             </div>
 
-            </form>
+        </form>
     </template>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
