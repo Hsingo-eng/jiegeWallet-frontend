@@ -146,6 +146,7 @@ function renderTransactions() {
     </div>`;
     return;
   }
+  console.log("目前的交易資料:", transactions);
 
   // 按日期排序 (新的在前)
   const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
