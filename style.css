@@ -686,20 +686,19 @@ div:where(.swal2-container) div:where(.swal2-popup) {
 
 /* 回覆區塊樣式 */
 .reply-box {
-    background-color: #fff0f6; /* 淡粉紅色背景 */
-    border: 3px solid #ff2e63; /* 普普風桃紅邊框 */
+    background-color: #7bb1b0; 
+    border: 3px solid #34343e; 
     border-radius: 15px;
     padding: 15px;
     margin-top: 20px;
     position: relative;
     box-shadow: 4px 4px 0 rgba(0,0,0,0.1); /* 微微的陰影 */
-    transform: rotate(-1deg); /* 稍微歪一點，比較俏皮 */
-}
+    }
 
 .reply-label {
     font-size: 0.85rem;
     font-weight: 800;
-    color: #ff2e63;
+    color: #080808;
     margin-bottom: 5px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -714,7 +713,7 @@ div:where(.swal2-container) div:where(.swal2-popup) {
 
 /* 列表中的回覆預覽樣式 */
 .list-reply-preview {
-    background-color: #fff0f6; /* 淡粉色背景，跟詳細頁面呼應 */
+    background-color: #c2eaff; 
     color: #555;
     font-size: 0.9rem;
     
