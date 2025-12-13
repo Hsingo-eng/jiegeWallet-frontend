@@ -22,6 +22,17 @@
 }
 
 
+body {
+    background-color: var(--primary-bg); 
+    
+    /* 套用設定的文字顏色 */
+    color: var(--text-color);
+    
+    /* 確保佔滿整個高度，避免背景色只有一半 */
+    min-height: 100vh;
+    margin: 0;
+}
+
 
 
 /* ===== Reset & Base ===== */
