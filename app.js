@@ -291,9 +291,6 @@ async function openAddTransactionModal() {
     title: "記一筆",
     html: `
       <form id="swal-txn-form" class="swal-form">
-        <div class="form-group">
-          <label>項目名稱</label>
-          <input type="text" id="swal-note" class="swal2-input" placeholder="例如：午餐、搭公車、買卡片" required autofocus>
         </div>
         <div class="form-group">
           <label>類別</label>
@@ -302,16 +299,13 @@ async function openAddTransactionModal() {
           </select>
         </div>
         <div class="form-group">
-          <label>金額</label>
-          <input type="number" id="swal-amount" class="swal2-input" placeholder="多少錢？" min="1" required>
-        </div>
+          <label>標題</label>
+          <input type="text" id="swal-note" class="swal2-input" placeholder="例如：午餐、搭公車、買卡片" required autofocus>
+        
         <div class="form-group">
-          <label>收支</label>
-          <select id="swal-type" class="swal2-select">
-            <option value="expense">支出</option>
-            <option value="income">收入</option>
-          </select>
-        </div>
+          <label>文字敘述</label>
+          <input type="number" id="swal-amount" class="swal2-input" placeholder="多少錢？" min="1" required>
+        
         <div class="form-group">
           <label>日期</label>
           <input type="date" id="swal-date" class="swal2-input" value="${today}" required>
