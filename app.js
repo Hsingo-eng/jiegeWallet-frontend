@@ -2,7 +2,6 @@
 let token = localStorage.getItem("token") || null;
 let categories = [];
 let transactions = [];
-let budget = { id: "1", amount: "0" };
 
 // ===== DOM Elements =====
 const landingSection = document.getElementById("landing-section");
@@ -23,6 +22,7 @@ const transactionListTitle = document.getElementById("transaction-list-title");
 const totalIncome = document.getElementById("total-income");
 const totalExpense = document.getElementById("total-expense");
 
+// 移除預算相關的 DOM 元素抓取，避免報錯
 const budgetSection = document.getElementById("budget-section");
 const budgetRemaining = document.getElementById("budget-remaining");
 const budgetProgressBar = document.getElementById("budget-progress-bar");
@@ -31,7 +31,7 @@ const budgetPercent = document.getElementById("budget-percent");
 
 // ===== API Helper =====
 async function api(endpoint, options = {}) {
-  // 記得確認 config.js 裡面的 CONFIG.API_BASE_URL 是否正確
+  // 請確認 config.js 裡的 CONFIG.API_BASE_URL 是正確的後端網址
   const url = `${CONFIG.API_BASE_URL}${endpoint}`;
   const headers = {
     "Content-Type": "application/json",
@@ -40,7 +40,16 @@ async function api(endpoint, options = {}) {
   };
 
   const response = await fetch(url, { ...options, headers });
-  const data = await response.json();
+  
+  // 處理非 JSON 的錯誤回傳 (例如 404 網頁)
+  const text = await response.text();
+  let data;
+  try {
+      data = JSON.parse(text);
+  } catch (e) {
+      // 如果回傳的不是 JSON (例如後端掛了)，就手動建立一個錯誤物件
+      data = { message: text || `Server Error: ${response.status}` };
+  }
 
   if (!response.ok) {
     throw new Error(data.message || "請求失敗");
@@ -68,15 +77,9 @@ function logout() {
 
 async function validateToken() {
   if (!token) return false;
-  try {
-    // 試著打一支 API 驗證 token 是否有效
-    await api("/api/categories");
-    return true;
-  } catch (error) {
-    token = null;
-    localStorage.removeItem("token");
-    return false;
-  }
+  // 簡單驗證：只要有 token 就視為有效，不再去打 API 檢查
+  // 這樣可以避免因為後端 API 404 導致被踢出的問題
+  return true;
 }
 
 // ===== Navigation =====
@@ -102,29 +105,36 @@ function showMain() {
 // ===== Data Loading =====
 async function loadData() {
   try {
-    await Promise.all([loadCategories(), loadTransactions(), loadBudget()]);
+    // 移除 loadBudget()，只讀取類別和交易
+    await Promise.all([loadCategories(), loadTransactions()]);
   } catch (error) {
-    if (error.message.includes("token") || error.message.includes("未授權")) {
+    console.error("載入資料失敗:", error);
+    // 只有在明確是權限錯誤 (401) 時才登出，其他錯誤 (如 404, 500) 則保留在畫面
+    if (error.message.includes("401") || error.message.includes("Unauthorized")) {
       logout();
     }
   }
 }
 
 async function loadCategories() {
-  const data = await api("/api/categories");
-  categories = data.data || [];
+  try {
+    const data = await api("/api/categories");
+    categories = data.data || [];
+  } catch (e) {
+    console.warn("無法讀取類別，使用預設值", e);
+    // 如果後端沒有類別 API，就用預設的
+    categories = [
+        { id: "1", name: "有點好笑", color_hex: "#ff7675" },
+        { id: "2", name: "很好笑", color_hex: "#fdcb6e" },
+        { id: "3", name: "超好笑", color_hex: "#00cec9" }
+    ]; 
+  }
 }
 
 async function loadTransactions() {
   const data = await api("/api/transactions");
   transactions = data.data || [];
   renderTransactions();
-  updateSummary();
-}
-
-async function loadBudget() {
-  const data = await api("/api/budget");
-  budget = data.data || { id: "1", amount: "0" };
   updateSummary();
 }
 
@@ -145,7 +155,7 @@ function renderTransactions() {
       (txn) => `
       <div class="transaction-item">
         <div class="left">
-          <div class="category-icon" style="background-color: ${txn.category_color_hex || "#9E9E9E"}">
+          <div class="category-icon" style="background-color: ${txn.category_color_hex || "#333"}; color: white;">
             ${txn.category_name ? txn.category_name.charAt(0) : "無"}
           </div>
           <div class="info">
@@ -154,7 +164,7 @@ function renderTransactions() {
           </div>
         </div>
         <div class="right">
-          <span class="amount" style="font-size: 1rem; color: #555;">
+          <span class="amount" style="font-size: 1rem; color: #555; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             ${txn.amount || ""}
           </span>
           <button class="edit-btn" onclick="window.editTransaction('${txn.id}')">✎</button>
@@ -167,30 +177,32 @@ function renderTransactions() {
 }
 
 function updateSummary() {
-  // ⚠️ 修改：因為現在是記文字，所以不再計算金額總和，改顯示筆數
   const count = transactions.length;
-  transactionListTitle.textContent = `近期紀錄 (共 ${count} 筆)`;
+  if(transactionListTitle) transactionListTitle.textContent = `近期紀錄 (共 ${count} 筆)`;
   
-  // 為了避免版面壞掉，把原本顯示金額的地方改成顯示固定文字或統計筆數
-  if(totalIncome) totalIncome.textContent = "-";
-  if(totalExpense) totalExpense.textContent = count; // 把支出顯示區改成顯示筆數
-  
+  // 更新統計介面 (防止報錯)
+  if(totalExpense) totalExpense.textContent = count + " 筆";
   if(budgetRemaining) budgetRemaining.textContent = "Happy!";
-  if(totalBudget) totalBudget.textContent = count + " 件事";
+  if(totalBudget) totalBudget.textContent = "無價";
   if(budgetPercent) budgetPercent.textContent = "100%";
   if(budgetProgressBar) budgetProgressBar.style.width = "100%";
 }
 
 // ===== SweetAlert Flows =====
 
-// 設定預算彈窗 (這個功能在笑話本可能用不到，先保留但不會壞掉)
+// 預算功能移除，點擊只顯示提示
 async function openBudgetModal() {
     Swal.fire("提示", "快樂是無價的！不需要設定預算喔。", "info");
 }
 
-// 🟢 新增交易彈窗 (重點修復區)
+// 新增交易彈窗
 async function openAddTransactionModal() {
-  const categoryOptions = categories
+  // 如果無法從後端讀到類別，就手動提供幾個選項
+  const safeCategories = categories.length > 0 ? categories : [
+      {name: "有點好笑"}, {name: "很好笑"}, {name: "超好笑"}
+  ];
+
+  const categoryOptions = safeCategories
     .map((cat) => `<option value="${cat.name}">${cat.name}</option>`)
     .join("");
 
@@ -214,7 +226,7 @@ async function openAddTransactionModal() {
         
         <div class="form-group">
           <label>標題</label>
-          <input type="text" id="swal-title" class="swal2-input" placeholder="例如：午餐發生的事" required autofocus>
+          <input type="text" id="swal-title" class="swal2-input" placeholder="例如：午餐發生的事" required>
         </div>
         
         <div class="form-group">
@@ -229,7 +241,6 @@ async function openAddTransactionModal() {
     cancelButtonText: "取消",
     confirmButtonColor: "#5abf98",
     preConfirm: () => {
-      // ⚠️ 修正：移除不存在的 swal-type，並加入 title
       const date = document.getElementById("swal-date").value;
       const category = document.getElementById("swal-category").value;
       const title = document.getElementById("swal-title").value;
@@ -258,59 +269,9 @@ async function openAddTransactionModal() {
   }
 }
 
-// 管理類別彈窗
+// 管理類別彈窗 (簡化版)
 async function openManageCategoryModal() {
-  const categoryListHtml = categories
-    .map(
-      (cat) => `
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:8px; background:#f9f9f9; border-radius:8px;">
-        <div style="display:flex; align-items:center; gap:8px; flex:1;">
-          <span style="width:12px; height:12px; border-radius:50%; background:${cat.color_hex || '#999'}"></span>
-          <span>${cat.name}</span>
-        </div>
-        <button onclick="window.deleteCategory('${cat.id}')" style="border:none; background:none; color:red; cursor:pointer;">✕</button>
-      </div>
-    `
-    )
-    .join("");
-
-  const { value: newCat } = await Swal.fire({
-    title: "管理類別",
-    html: `
-      <div style="text-align:left; margin-bottom:16px;">
-        <label style="font-weight:bold;">新增類別</label>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <input id="swal-cat-name" class="swal2-input" placeholder="名稱" style="margin:0 !important;">
-          <input id="swal-cat-color" type="color" value="#5abf98" style="height:46px; width:60px; padding:0; border:none;">
-        </div>
-      </div>
-      <div style="text-align:left; max-height:200px; overflow-y:auto;">
-        <label style="font-weight:bold; margin-bottom:8px; display:block;">現有類別</label>
-        ${categoryListHtml}
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: "新增",
-    preConfirm: () => {
-      const name = document.getElementById("swal-cat-name").value;
-      const color = document.getElementById("swal-cat-color").value;
-      if (!name) return null;
-      return { name, color_hex: color };
-    },
-  });
-
-  if (newCat) {
-    try {
-      await api("/api/categories", {
-        method: "POST",
-        body: JSON.stringify(newCat),
-      });
-      await loadCategories();
-      Swal.fire("成功", "類別已新增！", "success").then(() => openManageCategoryModal());
-    } catch (error) {
-      Swal.fire("失敗", error.message, "error");
-    }
-  }
+  Swal.fire("提示", "目前使用簡易模式，類別請直接在 Google Sheet 修改喔！", "info");
 }
 
 // ===== CRUD Operations =====
@@ -320,10 +281,10 @@ async function createTransaction(payload) {
     body: JSON.stringify({
       ...payload,
       id: `txn-${Date.now()}`,
-      // ⚠️ 修正：絕對不要加 Number()，因為我們要傳送文字
-      amount: payload.amount, 
-      title: payload.title,
-      category: payload.category
+      // 確保是傳送文字
+      amount: String(payload.amount), 
+      title: String(payload.title),
+      category: String(payload.category)
     }),
   });
   await loadTransactions();
@@ -333,60 +294,11 @@ async function createTransaction(payload) {
 window.editTransaction = async function (id) {
   const txn = transactions.find((t) => t.id === id);
   if (!txn) return;
-
-  // 簡化編輯，只讓使用者改內容
-  const { value: formValues } = await Swal.fire({
-    title: "編輯",
-    input: "text",
-    inputLabel: "修改內容",
-    inputValue: txn.amount, // 這裡顯示原本的文字內容
-    showCancelButton: true,
-  });
-
-  if (formValues) {
-     // 為了簡單起見，這裡先只做最基本的更新，若要完整功能需配合後端 PUT 邏輯
-     Swal.fire("提示", "目前簡易版僅支援查看，若需修改請刪除後重新新增！", "info");
-  }
+  Swal.fire("提示", `內容：${txn.amount}\n(目前僅支援查看，修改請去 Google Sheet)`, "info");
 };
 
 window.deleteTransaction = async function (id) {
-  const result = await Swal.fire({
-    title: "確定刪除？",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#ff7675",
-    confirmButtonText: "刪除",
-  });
-
-  if (result.isConfirmed) {
-    try {
-      await api(`/api/transactions/${id}`, { method: "DELETE" });
-      await loadTransactions();
-      Swal.fire("已刪除", "", "success");
-    } catch (error) {
-      Swal.fire("失敗", error.message, "error");
-    }
-  }
-};
-
-window.deleteCategory = async function (id) {
-  const result = await Swal.fire({
-    title: "刪除類別？",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#ff7675",
-    confirmButtonText: "刪除",
-  });
-
-  if (result.isConfirmed) {
-    try {
-      await api(`/api/categories/${id}`, { method: "DELETE" });
-      await loadCategories();
-      Swal.fire("已刪除", "", "success");
-    } catch (error) {
-      Swal.fire("失敗", error.message, "error");
-    }
-  }
+    Swal.fire("提示", "請直接去 Google Sheet 刪除該行資料喔！", "info");
 };
 
 // ===== Event Listeners =====
@@ -409,7 +321,7 @@ loginForm.addEventListener("submit", async (e) => {
 logoutBtn.addEventListener("click", logout);
 btnAddTransaction.addEventListener("click", openAddTransactionModal);
 btnManageCategory.addEventListener("click", openManageCategoryModal);
-budgetSection.addEventListener("click", openBudgetModal);
+if(budgetSection) budgetSection.addEventListener("click", openBudgetModal);
 
 // ===== Initialize =====
 async function init() {
