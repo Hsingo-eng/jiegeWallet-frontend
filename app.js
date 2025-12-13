@@ -31,6 +31,7 @@ const budgetPercent = document.getElementById("budget-percent");
 
 // ===== API Helper =====
 async function api(endpoint, options = {}) {
+  // 記得確認 config.js 裡面的 CONFIG.API_BASE_URL 是否正確
   const url = `${CONFIG.API_BASE_URL}${endpoint}`;
   const headers = {
     "Content-Type": "application/json",
@@ -68,6 +69,7 @@ function logout() {
 async function validateToken() {
   if (!token) return false;
   try {
+    // 試著打一支 API 驗證 token 是否有效
     await api("/api/categories");
     return true;
   } catch (error) {
@@ -135,47 +137,28 @@ function renderTransactions() {
     return;
   }
 
-  // 按 ID 排序（新的在前），如果 ID 相同才按日期
-  const sorted = [...transactions].sort((a, b) => {
-    // 嘗試將 ID 轉為數字比較（處理 txn-timestamp 格式）
-    const getIdNum = (id) => {
-      const match = id.match(/(\d+)$/);
-      return match ? Number(match[1]) : 0;
-    };
-    const idDiff = getIdNum(b.id) - getIdNum(a.id);
-    if (idDiff !== 0) return idDiff;
-
-    // ID 無法比較時，按日期排序
-    return new Date(b.date) - new Date(a.date);
-  });
+  // 按日期排序 (新的在前)
+  const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   transactionList.innerHTML = sorted
     .map(
       (txn) => `
       <div class="transaction-item">
         <div class="left">
-          <div class="category-icon" style="background-color: ${
-            txn.category_color_hex || "#9E9E9E"
-          }">
-            ${txn.category_name.charAt(0)}
+          <div class="category-icon" style="background-color: ${txn.category_color_hex || "#9E9E9E"}">
+            ${txn.category_name ? txn.category_name.charAt(0) : "無"}
           </div>
           <div class="info">
-            <span class="note">${txn.note || txn.category_name}</span>
-            <span class="meta">${txn.date} · ${txn.category_name}</span>
+            <span class="note">${txn.title || "無標題"}</span>
+            <span class="meta">${txn.date} · ${txn.category_name || "一般"}</span>
           </div>
         </div>
         <div class="right">
-          <span class="amount ${txn.type}">
-            ${txn.type === "income" ? "+" : "-"}${Number(
-        txn.amount
-      ).toLocaleString()}
+          <span class="amount" style="font-size: 1rem; color: #555;">
+            ${txn.amount || ""}
           </span>
-          <button class="edit-btn" onclick="window.editTransaction('${
-            txn.id
-          }')">✎</button>
-          <button class="delete-btn" onclick="window.deleteTransaction('${
-            txn.id
-          }')">✕</button>
+          <button class="edit-btn" onclick="window.editTransaction('${txn.id}')">✎</button>
+          <button class="delete-btn" onclick="window.deleteTransaction('${txn.id}')">✕</button>
         </div>
       </div>
     `
@@ -184,105 +167,31 @@ function renderTransactions() {
 }
 
 function updateSummary() {
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-
-  // 更新標題為當月
-  transactionListTitle.textContent = `${currentMonth + 1}月收支`;
-
-  const monthlyTransactions = transactions.filter((txn) => {
-    const txnDate = new Date(txn.date);
-    return (
-      txnDate.getMonth() === currentMonth &&
-      txnDate.getFullYear() === currentYear
-    );
-  });
-
-  const income = monthlyTransactions
-    .filter((txn) => txn.type === "income")
-    .reduce((sum, txn) => sum + Number(txn.amount), 0);
-
-  const expense = monthlyTransactions
-    .filter((txn) => txn.type === "expense")
-    .reduce((sum, txn) => sum + Number(txn.amount), 0);
-
-  totalIncome.textContent = income.toLocaleString();
-  totalExpense.textContent = expense.toLocaleString();
-
-  // Update Budget UI
-  const budgetAmount = Number(budget.amount);
-  const remaining = budgetAmount - expense;
-  const percent =
-    budgetAmount > 0 ? Math.round((remaining / budgetAmount) * 100) : 0;
-
-  budgetRemaining.textContent = `$${remaining.toLocaleString()}`;
-  totalBudget.textContent = `$${budgetAmount.toLocaleString()}`;
-  budgetPercent.textContent = `${percent}%`;
-
-  // Progress Bar
-  let progressWidth = budgetAmount > 0 ? (remaining / budgetAmount) * 100 : 0;
-  progressWidth = Math.max(0, Math.min(100, progressWidth)); // Clamp between 0-100
-  budgetProgressBar.style.width = `${progressWidth}%`;
-
-  // Colors
-  budgetProgressBar.className = "progress-bar-fill"; // reset
-  if (percent < 20) {
-    budgetProgressBar.classList.add("danger");
-  } else if (percent < 50) {
-    budgetProgressBar.classList.add("warning");
-  }
+  // ⚠️ 修改：因為現在是記文字，所以不再計算金額總和，改顯示筆數
+  const count = transactions.length;
+  transactionListTitle.textContent = `近期紀錄 (共 ${count} 筆)`;
+  
+  // 為了避免版面壞掉，把原本顯示金額的地方改成顯示固定文字或統計筆數
+  if(totalIncome) totalIncome.textContent = "-";
+  if(totalExpense) totalExpense.textContent = count; // 把支出顯示區改成顯示筆數
+  
+  if(budgetRemaining) budgetRemaining.textContent = "Happy!";
+  if(totalBudget) totalBudget.textContent = count + " 件事";
+  if(budgetPercent) budgetPercent.textContent = "100%";
+  if(budgetProgressBar) budgetProgressBar.style.width = "100%";
 }
 
 // ===== SweetAlert Flows =====
 
-// 設定預算彈窗
+// 設定預算彈窗 (這個功能在笑話本可能用不到，先保留但不會壞掉)
 async function openBudgetModal() {
-  const { value: amount } = await Swal.fire({
-    title: "設定每月總預算",
-    input: "number",
-    inputLabel: "請輸入金額",
-    inputValue: budget.amount,
-    showCancelButton: true,
-    confirmButtonText: "儲存",
-    cancelButtonText: "取消",
-    confirmButtonColor: "#5abf98",
-    inputValidator: (value) => {
-      if (!value || Number(value) < 0) {
-        return "請輸入有效的金額！";
-      }
-    },
-  });
-
-  if (amount) {
-    Swal.fire({
-      title: "儲存中...",
-      text: "正在更新預算",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-
-    try {
-      await api("/api/budget", {
-        method: "PUT",
-        body: JSON.stringify({ amount }),
-      });
-      await loadBudget();
-      Swal.fire("成功", "預算已更新！", "success");
-    } catch (error) {
-      Swal.fire("失敗", error.message, "error");
-    }
-  }
+    Swal.fire("提示", "快樂是無價的！不需要設定預算喔。", "info");
 }
 
-// 新增交易彈窗
+// 🟢 新增交易彈窗 (重點修復區)
 async function openAddTransactionModal() {
-  // 準備類別選項 HTML
   const categoryOptions = categories
-    .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
+    .map((cat) => `<option value="${cat.name}">${cat.name}</option>`)
     .join("");
 
   const today = new Date().toISOString().split("T")[0];
@@ -291,61 +200,58 @@ async function openAddTransactionModal() {
     title: "記一筆",
     html: `
       <form id="swal-txn-form" class="swal-form">
+        <div class="form-group">
+          <label>日期</label>
+          <input type="date" id="swal-date" class="swal2-input" value="${today}" required>
         </div>
+        
         <div class="form-group">
           <label>類別</label>
           <select id="swal-category" class="swal2-select">
             ${categoryOptions}
           </select>
         </div>
+        
         <div class="form-group">
           <label>標題</label>
-          <input type="text" id="swal-note" class="swal2-input" placeholder="例如：午餐、搭公車、買卡片" required autofocus>
+          <input type="text" id="swal-title" class="swal2-input" placeholder="例如：午餐發生的事" required autofocus>
+        </div>
         
         <div class="form-group">
-          <label>文字敘述</label>
-          <input type="number" id="swal-amount" class="swal2-input" placeholder="多少錢？" min="1" required>
-        
-        <div class="form-group">
-          <label>日期</label>
-          <input type="date" id="swal-date" class="swal2-input" value="${today}" required>
+          <label>內容</label>
+          <input type="text" id="swal-amount" class="swal2-input" placeholder="內容..." required>
         </div>
       </form>
     `,
     focusConfirm: false,
     showCancelButton: true,
-    confirmButtonText: "記帳！",
-    cancelButtonText: "算了",
+    confirmButtonText: "記錄！",
+    cancelButtonText: "取消",
     confirmButtonColor: "#5abf98",
     preConfirm: () => {
-      return {
-        date: document.getElementById("swal-date").value,
-        type: document.getElementById("swal-type").value,
-        category_id: document.getElementById("swal-category").value,
-        amount: document.getElementById("swal-amount").value,
-        note: document.getElementById("swal-note").value,
-      };
+      // ⚠️ 修正：移除不存在的 swal-type，並加入 title
+      const date = document.getElementById("swal-date").value;
+      const category = document.getElementById("swal-category").value;
+      const title = document.getElementById("swal-title").value;
+      const amount = document.getElementById("swal-amount").value;
+
+      if (!title || !amount) {
+        Swal.showValidationMessage("標題和內容都要填寫喔！");
+      }
+
+      return { date, category, title, amount };
     },
   });
 
   if (formValues) {
-    if (!formValues.amount)
-      return Swal.fire("哎呀！", "金額沒填喔！", "warning");
-
-    // 顯示 loading
     Swal.fire({
       title: "處理中...",
-      text: "正在儲存記帳資料",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      didOpen: () => Swal.showLoading(),
     });
 
     try {
       await createTransaction(formValues);
-      Swal.fire("成功！", "記帳完成！", "success");
+      Swal.fire("成功！", "已新增紀錄！", "success");
     } catch (error) {
       Swal.fire("失敗", error.message, "error");
     }
@@ -358,20 +264,11 @@ async function openManageCategoryModal() {
     .map(
       (cat) => `
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:8px; background:#f9f9f9; border-radius:8px;">
-        <div style="display:flex; align-items:center; gap:8px; cursor:pointer; flex:1;" onclick="window.editCategory('${
-          cat.id
-        }', '${cat.name}', '${cat.color_hex}')">
-          <span style="width:12px; height:12px; border-radius:50%; background:${
-            cat.color_hex
-          }"></span>
+        <div style="display:flex; align-items:center; gap:8px; flex:1;">
+          <span style="width:12px; height:12px; border-radius:50%; background:${cat.color_hex || '#999'}"></span>
           <span>${cat.name}</span>
-          <span style="font-size:0.8em; color:#999;">(點擊編輯)</span>
         </div>
-        ${
-          cat.id !== "1"
-            ? `<button onclick="window.deleteCategory('${cat.id}')" style="border:none; background:none; color:red; cursor:pointer; padding:4px 8px;">✕</button>`
-            : ""
-        }
+        <button onclick="window.deleteCategory('${cat.id}')" style="border:none; background:none; color:red; cursor:pointer;">✕</button>
       </div>
     `
     )
@@ -384,19 +281,16 @@ async function openManageCategoryModal() {
         <label style="font-weight:bold;">新增類別</label>
         <div style="display:flex; gap:8px; margin-top:8px;">
           <input id="swal-cat-name" class="swal2-input" placeholder="名稱" style="margin:0 !important;">
-          <input id="swal-cat-color" type="color" value="#5abf98" style="height:46px; width:60px; padding:0; border:none; background:none;">
+          <input id="swal-cat-color" type="color" value="#5abf98" style="height:46px; width:60px; padding:0; border:none;">
         </div>
       </div>
-      <hr style="border:0; border-top:1px dashed #ccc; margin:16px 0;">
       <div style="text-align:left; max-height:200px; overflow-y:auto;">
-        <label style="font-weight:bold; margin-bottom:8px; display:block;">現有類別 (點擊可編輯)</label>
+        <label style="font-weight:bold; margin-bottom:8px; display:block;">現有類別</label>
         ${categoryListHtml}
       </div>
     `,
     showCancelButton: true,
-    confirmButtonText: "新增類別",
-    cancelButtonText: "關閉",
-    confirmButtonColor: "#5abf98",
+    confirmButtonText: "新增",
     preConfirm: () => {
       const name = document.getElementById("swal-cat-name").value;
       const color = document.getElementById("swal-cat-color").value;
@@ -406,85 +300,18 @@ async function openManageCategoryModal() {
   });
 
   if (newCat) {
-    Swal.fire({
-      title: "新增中...",
-      text: "正在建立類別",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-
     try {
       await api("/api/categories", {
         method: "POST",
         body: JSON.stringify(newCat),
       });
       await loadCategories();
-      Swal.fire("成功", "類別已新增！", "success").then(() =>
-        openManageCategoryModal()
-      );
+      Swal.fire("成功", "類別已新增！", "success").then(() => openManageCategoryModal());
     } catch (error) {
       Swal.fire("失敗", error.message, "error");
     }
   }
 }
-
-// 編輯類別
-window.editCategory = async function (id, currentName, currentColor) {
-  const { value: updatedCat } = await Swal.fire({
-    title: "編輯類別",
-    html: `
-      <div style="text-align:left;">
-        <div style="margin-bottom:16px;">
-          <label>類別名稱</label>
-          <input id="edit-cat-name" class="swal2-input" value="${currentName}" placeholder="名稱">
-        </div>
-        <div>
-          <label>代表色</label>
-          <input id="edit-cat-color" type="color" value="${currentColor}" style="width:100%; height:50px; padding:0; border:none;">
-        </div>
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: "儲存",
-    cancelButtonText: "取消",
-    confirmButtonColor: "#5abf98",
-    preConfirm: () => {
-      return {
-        name: document.getElementById("edit-cat-name").value,
-        color_hex: document.getElementById("edit-cat-color").value,
-      };
-    },
-  });
-
-  if (updatedCat) {
-    Swal.fire({
-      title: "更新中...",
-      text: "正在儲存變更",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-
-    try {
-      await api(`/api/categories/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(updatedCat),
-      });
-      await loadCategories();
-      // 編輯完後重新打開管理列表，方便繼續操作
-      Swal.fire("成功", "類別已更新！", "success").then(() =>
-        openManageCategoryModal()
-      );
-    } catch (error) {
-      Swal.fire("失敗", error.message, "error");
-    }
-  }
-};
 
 // ===== CRUD Operations =====
 async function createTransaction(payload) {
@@ -493,7 +320,10 @@ async function createTransaction(payload) {
     body: JSON.stringify({
       ...payload,
       id: `txn-${Date.now()}`,
-      amount: Number(payload.amount),
+      // ⚠️ 修正：絕對不要加 Number()，因為我們要傳送文字
+      amount: payload.amount, 
+      title: payload.title,
+      category: payload.category
     }),
   });
   await loadTransactions();
@@ -504,120 +334,35 @@ window.editTransaction = async function (id) {
   const txn = transactions.find((t) => t.id === id);
   if (!txn) return;
 
-  const categoryOptions = categories
-    .map(
-      (cat) =>
-        `<option value="${cat.id}" ${
-          cat.id === txn.category_id ? "selected" : ""
-        }>${cat.name}</option>`
-    )
-    .join("");
-
+  // 簡化編輯，只讓使用者改內容
   const { value: formValues } = await Swal.fire({
-    title: "編輯記帳",
-    html: `
-      <form id="swal-txn-form" class="swal-form">
-        <div class="form-group">
-          <label>項目名稱</label>
-          <input type="text" id="swal-note" class="swal2-input" placeholder="例如：午餐、搭公車、買卡片" value="${
-            txn.note || ""
-          }" required autofocus>
-        </div>
-        <div class="form-group">
-          <label>類別</label>
-          <select id="swal-category" class="swal2-select">
-            ${categoryOptions}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>金額</label>
-          <input type="number" id="swal-amount" class="swal2-input" placeholder="多少錢？" min="1" value="${
-            txn.amount
-          }" required>
-        </div>
-        <div class="form-group">
-          <label>收支</label>
-          <select id="swal-type" class="swal2-select">
-            <option value="expense" ${
-              txn.type === "expense" ? "selected" : ""
-            }>支出</option>
-            <option value="income" ${
-              txn.type === "income" ? "selected" : ""
-            }>收入</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>日期</label>
-          <input type="date" id="swal-date" class="swal2-input" value="${
-            txn.date
-          }" required>
-        </div>
-      </form>
-    `,
-    focusConfirm: false,
+    title: "編輯",
+    input: "text",
+    inputLabel: "修改內容",
+    inputValue: txn.amount, // 這裡顯示原本的文字內容
     showCancelButton: true,
-    confirmButtonText: "儲存",
-    cancelButtonText: "取消",
-    confirmButtonColor: "#5abf98",
-    preConfirm: () => {
-      return {
-        date: document.getElementById("swal-date").value,
-        type: document.getElementById("swal-type").value,
-        category_id: document.getElementById("swal-category").value,
-        amount: document.getElementById("swal-amount").value,
-        note: document.getElementById("swal-note").value,
-      };
-    },
   });
 
   if (formValues) {
-    if (!formValues.amount)
-      return Swal.fire("哎呀！", "金額沒填喔！", "warning");
-
-    // 顯示 loading
-    Swal.fire({
-      title: "更新中...",
-      text: "正在儲存變更",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-
-    try {
-      await api(`/api/transactions/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          ...formValues,
-          amount: Number(formValues.amount),
-        }),
-      });
-      await loadTransactions();
-      Swal.fire("成功！", "記帳已更新！", "success");
-    } catch (error) {
-      Swal.fire("失敗", error.message, "error");
-    }
+     // 為了簡單起見，這裡先只做最基本的更新，若要完整功能需配合後端 PUT 邏輯
+     Swal.fire("提示", "目前簡易版僅支援查看，若需修改請刪除後重新新增！", "info");
   }
 };
 
-// 把刪除函式掛載到 window 以便在 innerHTML onclick 中呼叫
 window.deleteTransaction = async function (id) {
   const result = await Swal.fire({
-    title: "確定要刪除嗎？",
-    text: "這筆紀錄會消失在時空縫隙中喔！",
+    title: "確定刪除？",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#ff7675",
     confirmButtonText: "刪除",
-    cancelButtonText: "取消",
   });
 
   if (result.isConfirmed) {
     try {
       await api(`/api/transactions/${id}`, { method: "DELETE" });
       await loadTransactions();
-      Swal.fire("已刪除！", "紀錄已移除。", "success");
+      Swal.fire("已刪除", "", "success");
     } catch (error) {
       Swal.fire("失敗", error.message, "error");
     }
@@ -627,19 +372,17 @@ window.deleteTransaction = async function (id) {
 window.deleteCategory = async function (id) {
   const result = await Swal.fire({
     title: "刪除類別？",
-    text: "該類別無法復原喔！",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#ff7675",
     confirmButtonText: "刪除",
-    cancelButtonText: "取消",
   });
 
   if (result.isConfirmed) {
     try {
       await api(`/api/categories/${id}`, { method: "DELETE" });
       await loadCategories();
-      Swal.fire("已刪除！", "類別已移除。", "success");
+      Swal.fire("已刪除", "", "success");
     } catch (error) {
       Swal.fire("失敗", error.message, "error");
     }
@@ -653,10 +396,8 @@ backToLandingBtn.addEventListener("click", showLanding);
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginError.textContent = "";
-
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
-
   try {
     await login(username, password);
     showMain();
