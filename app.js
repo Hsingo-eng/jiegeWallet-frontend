@@ -153,36 +153,46 @@ function renderTransactions() {
   transactionList.innerHTML = sorted
     .map(
       (txn) => {
-        // 🌟 這裡就是定義圖示的地方！你可以自由更換喜歡的 Emoji
-        let icon = "😐"; // 預設圖示 (如果找不到分類)
-        
-        // 為了避免資料庫有空白，我們去除多餘空白再比對
+        // 設定表情符號
+        let icon = "😐"; 
         const catName = (txn.category_name || "").trim();
-        
         if (catName === "有點好笑") icon = "😏";
         else if (catName === "很好笑") icon = "😆";
         else if (catName === "超好笑") icon = "🤣";
         else if (catName === "笑到歪腰") icon = "🫠";
-        else if (catName === "一般") icon = "😐";
+
+        // 🟢 檢查是否有回覆
+        const replyHtml = txn.reply 
+          ? `<div class="list-reply-preview">
+               <span style="color:#ff2e63; font-weight:bold;">↳</span> ${txn.reply}
+             </div>` 
+          : "";
 
         return `
-        <div class="transaction-item" onclick="window.viewTransaction('${txn.id}')" style="cursor: pointer;">
-          <div class="left">
-            <div class="category-icon" style="background-color: ${txn.category_color_hex || "#333"}; color: white; font-size: 1.5rem; display: flex; align-items: center; justify-content: center;">
-              ${icon}
-            </div>
-            <div class="info">
-              <span class="note">${txn.title || "無標題"}</span>
-              <span class="meta">${txn.date} · ${txn.category_name || "一般"}</span>
-            </div>
+        <div class="transaction-item" onclick="window.viewTransaction('${txn.id}')" 
+             style="cursor: pointer; flex-direction: column; align-items: stretch; gap: 0;">
+          
+          <div class="txn-main-row" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="left">
+                <div class="category-icon" style="background-color: ${txn.category_color_hex || "#333"}; color: white; font-size: 1.5rem; display: flex; align-items: center; justify-content: center;">
+                  ${icon}
+                </div>
+                <div class="info">
+                  <span class="note">${txn.title || "無標題"}</span>
+                  <span class="meta">${txn.date} · ${txn.category_name || "一般"}</span>
+                </div>
+              </div>
+              <div class="right">
+                <span class="amount" style="font-size: 1rem; color: #555; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  ${txn.amount || ""}
+                </span>
+                <button class="edit-btn" onclick="event.stopPropagation(); window.editTransaction('${txn.id}')">✎</button>
+                <button class="delete-btn" onclick="event.stopPropagation(); window.deleteTransaction('${txn.id}')">✕</button>
+              </div>
           </div>
-          <div class="right">
-            <span class="amount" style="font-size: 1rem; color: #555; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              ${txn.amount || ""}
-            </span>
-            <button class="edit-btn" onclick="event.stopPropagation(); window.editTransaction('${txn.id}')">✎</button>
-            <button class="delete-btn" onclick="event.stopPropagation(); window.deleteTransaction('${txn.id}')">✕</button>
-          </div>
+
+          ${replyHtml}
+
         </div>
       `;
       }

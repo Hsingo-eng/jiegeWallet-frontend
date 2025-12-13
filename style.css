@@ -711,3 +711,23 @@ div:where(.swal2-container) div:where(.swal2-popup) {
     font-weight: bold;
     line-height: 1.6;
 }
+
+/* 列表中的回覆預覽樣式 */
+.list-reply-preview {
+    background-color: #fff0f6; /* 淡粉色背景，跟詳細頁面呼應 */
+    color: #555;
+    font-size: 0.9rem;
+    
+    /* 讓它看起來像是在對話 */
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    
+    /* 稍微縮進去一點，增加層次感 */
+    margin-left: 58px; /* 避開左邊的圓形 Icon */
+    
+    /* 文字溢出時顯示點點點 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
