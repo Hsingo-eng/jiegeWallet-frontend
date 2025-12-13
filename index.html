@@ -119,11 +119,16 @@
                 <select id="swal-category" class="swal2-select">
                     <!-- JS 填入 -->
                 </select>
-            </div>
             <div class="form-group">
-                <label>說一下吧！</label>
-                <input type="number" id="swal-amount" class="swal2-input" placeholder="Text" min="1" required>
+                <label>用途說明 (對應 title)</label>
+                <input type="text" id="swal-title" class="swal2-input" placeholder="例如：午餐吃丹丹" required>
             </div>
+
+            <div class="form-group">
+                <label>金額 (對應 Text)</label>
+                <input type="number" id="swal-amount" class="swal2-input" placeholder="輸入金額" min="1" required>
+            </div>
+            
             <div class="form-group">
                 <label>備註</label>
                 <input type="text" id="swal-note" class="swal2-input" placeholder="例如：買卡片、聚餐">
