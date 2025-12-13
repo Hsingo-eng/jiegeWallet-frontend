@@ -38,7 +38,7 @@ frontend/
 
 ```javascript
 const CONFIG = {
-  API_BASE_URL: "https://your-backend.zeabur.app",
+  API_BASE_URL: "hsingo-wallet-backend.zeabur.app",
 };
 ```
 
