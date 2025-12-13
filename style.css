@@ -219,15 +219,22 @@ input:focus, select:focus {
   width: auto;
 }
 
+/* 修改後的按鈕樣式 (深灰色) */
 .btn-primary {
-  background: var(--primary-green);
-  color: rgb(192, 15, 12);
-  box-shadow: 0 4px 0 var(--primary-green-dark);
+  /* 1. 背景改成深灰色 */
+  background: #333333; 
+  
+  /* 2. 文字維持白色 */
+  color: white;
+  
+  /* 3. 陰影改成純黑色 (000000)，讓立體感更強 */
+  box-shadow: 0 4px 0 #000000; 
 }
 
 .btn-primary:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 var(--primary-green-dark);
+  /* 4. 按下去的時候，陰影也要確保是黑色的 */
+  box-shadow: 0 0 0 #000000; 
 }
 
 .btn-secondary {
