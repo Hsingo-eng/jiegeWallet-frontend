@@ -10,33 +10,28 @@
     <link rel="apple-touch-icon" sizes="180x180" href="./icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- 圓體字型 -->
     <link
         href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Zen+Maru+Gothic:wght@400;500;700&display=swap"
         rel="stylesheet">
-    <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="style.css??v=abc">
+    <link rel="stylesheet" href="style.css?v=abc">
 </head>
 
 <body>
     <div class="app">
 
-        <!-- 歡迎畫面 (Landing) -->
         <section id="landing-section" class="section landing-container">
             <div class="landing-card">
-                <div class="app-logo">💰</div>
-                <h1>很好笑的<br>好笑紀錄本</h1>
+                <div class="app-logo">🤣</div> <h1>很好笑的<br>好笑紀錄本</h1>
                 <p class="subtitle">刺頭知道密碼嗎？<br>猜猜看(提示：帳號是昕狗 密碼8碼)</p>
                 <button id="go-login-btn" class="btn btn-primary btn-lg">打開</button>
             </div>
         </section>
 
-        <!-- 登入畫面 -->
         <section id="login-section" class="section hidden">
             <div class="login-card">
                 <button id="back-to-landing" class="btn-icon back-btn">←</button>
-                <div class="app-logo small">💰</div>
+                <div class="app-logo small">🤣</div>
                 <h2>開始記錄！</h2>
                 <form id="login-form">
                     <div class="form-group">
@@ -55,35 +50,30 @@
             </div>
         </section>
 
-        <!-- 主畫面 (Dashboard) -->
         <section id="main-section" class="section hidden">
             <header class="header">
                 <div class="brand">
-                    <span class="app-logo small">💰</span>
+                    <span class="app-logo small">🤣</span>
                     <span id="welcome-msg">Are you happy?</span>
                 </div>
                 <button id="logout-btn" class="btn btn-sm btn-secondary">登出</button>
             </header>
 
-            <!-- 帳戶統計 -->
             <div class="bells-card">
                 <div class="budget-main-display" id="budget-section">
                     <span class="label-lg">好笑事件累積</span>
-                    <div class="amount-hero" id="budget-remaining">$0</div>
+                    <div class="amount-hero" id="budget-remaining">Happy!</div>
 
                     <div class="progress-bar-bg">
-                        <div id="budget-progress-bar" class="progress-bar-fill" style="width: 0%"></div>
+                        <div id="budget-progress-bar" class="progress-bar-fill" style="width: 100%"></div>
                     </div>
                     <div class="budget-meta">
                         <span>統計: <span id="total-budget">0</span></span>
-                        <span id="budget-percent">0%</span>
+                        <span id="budget-percent">100%</span>
                     </div>
                 </div>
-
-                
             </div>
 
-            <!-- 功能按鈕區 -->
             <div class="action-grid">
                 <button id="btn-add-transaction" class="action-card income">
                     <span class="icon">✏️</span>
@@ -91,48 +81,43 @@
                 </button>
                 <button id="btn-manage-category" class="action-card expense">
                     <span class="icon">🗂️</span>
-                    <span>管理分類</span>
+                    <span>查看分類</span>
                 </button>
             </div>
 
-            <!-- 交易紀錄 -->
             <div class="list-container">
-                <h3 id="transaction-list-title">11月</h3>
+                <h3 id="transaction-list-title">近期紀錄</h3>
                 <div id="transaction-list" class="transaction-list">
-                    <!-- 動態載入 -->
-                </div>
+                    </div>
             </div>
         </section>
 
     </div>
 
-    <!-- 隱藏的 Template 用於 SweetAlert -->
     <template id="tpl-transaction-form">
         <form id="swal-txn-form" class="swal-form">
+            
             <div class="form-group">
                 <label>日期</label>
                 <input type="date" id="swal-date" class="swal2-input" required>
             </div>
-            
+
             <div class="form-group">
-                <label>類別</label>
-                <select id="swal-category" class="swal2-select">
-                    <!-- JS 填入 -->
-                </select>
-            <div class="form-group">
-                <label>用途說明 (對應 title)</label>
-                <input type="text" id="swal-title" class="swal2-input" placeholder="例如：午餐吃丹丹" required>
+                <label>標題</label>
+                <input type="text" id="swal-title" class="swal2-input" placeholder="例如：午餐發生的事" required>
             </div>
 
             <div class="form-group">
-                <label>金額 (對應 Text)</label>
-                <input type="number" id="swal-amount" class="swal2-input" placeholder="輸入金額" min="1" required>
+                <label>文字敘述</label>
+                <input type="text" id="swal-amount" class="swal2-input" placeholder="例如：笑死我了" required>
+            </div>
+
+            <div class="form-group" style="display:none;">
+                <select id="swal-category" class="swal2-select">
+                    <option value="一般" selected>一般</option>
+                </select>
             </div>
             
-            <div class="form-group">
-                <label>備註</label>
-                <input type="text" id="swal-note" class="swal2-input" placeholder="例如：買卡片、聚餐">
-            </div>
         </form>
     </template>
 
