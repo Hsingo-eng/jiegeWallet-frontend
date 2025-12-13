@@ -1,54 +1,60 @@
 /* ===== CSS Variables ===== */
+/* ===== Pop Art (普普風) 主題設定 ===== */
 :root {
-  /* 背景與卡片 */
-  --primary-bg: #fff8e1;        /* 偏黃白底，像漫畫紙 */
-  --card-bg: #ffffff;          /* 純白卡片 */
-
-  /* 文字 */
-  --text-color: #1a1a1a;        /* 幾乎黑色，強烈對比 */
-  --text-light: #444444;
-
-  /* 普普風主色（高飽和） */
-  --primary-red: #ff2e2e;       /* 漫畫紅 */
-  --primary-yellow: #ffd400;    /* 鮮黃 */
-  --primary-blue: #0066ff;      /* 強烈藍 */
-  --primary-green: #00c271;     /* 點綴綠 */
-  --primary-green-dark: #00985a;
-
-  /* 邊框與陰影 */
-  --border-color: #1a1a1a;      /* 黑邊線很重要！ */
-  --radius: 18px;               /* 稍微收斂一點 */
-  --shadow: 6px 6px 0 #1a1a1a;  /* 普普風硬陰影 */
-}
-
-/* ===== Reset & Base ===== */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  /* 1. 核心配色：高飽和度的撞色 */
+  --primary-bg: #ffe600;      /* 漫畫亮黃 (背景) */
+  --pop-blue: #00aaff;        /* 亮藍色 (圓點) */
+  --pop-red: #ff2e63;         /* 或是你要改用桃紅色點點也可以換這個 */
+  
+  /* 2. 為了搭配普普風，卡片和文字要更銳利 */
+  --card-bg: #ffffff;
+  --text-color: #000000;      /* 純黑文字，對比才夠強 */
+  --border-color: #000000;    /* 黑色粗框是普普風的靈魂 */
+  --shadow: 8px 8px 0 #000000;/* 黑色硬陰影 */
 }
 
 body {
   font-family: 'Zen Maru Gothic', 'Varela Round', sans-serif;
   
-  /* 1. 底色：保留原本的漫畫紙黃色 */
+  /* 設定底色：亮黃色 */
   background-color: var(--primary-bg);
   
-  /* 2. 背景圖：改用更大、更明顯的漫畫圓點 (Ben-Day Dots) */
-  /* 使用半透明的藍色圓點，與黃底形成普普風撞色 */
+  /* 🌟 普普風背景魔法 (由兩層圖案疊加) 🌟 */
   background-image: 
-      radial-gradient(rgba(0, 102, 255, 0.15) 20%, transparent 20%), 
-      radial-gradient(rgba(0, 102, 255, 0.15) 20%, transparent 20%);
+      /* 第一層：Ben-Day Dots (漫畫圓點) - 半透明藍色 */
+      radial-gradient(rgba(0, 170, 255, 0.4) 25%, transparent 26%),
       
-  /* 3. 圓點尺寸加大 */
-  background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
+      /* 第二層：漫畫速度線/斜紋 (增加動感) - 半透明白色 */
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 15px,
+        rgba(255, 255, 255, 0.6) 15px,
+        rgba(255, 255, 255, 0.6) 30px
+      );
+      
+  /* 設定圖案大小 */
+  background-size: 
+      30px 30px,   /* 圓點的大小 (越小越密) */
+      100% 100%;   /* 斜紋鋪滿 */
+      
+  /* 讓圓點錯開一點，更有漫畫印刷感 */
+  background-position: 0 0, 0 0;
   
-  /* 其他設定 */
+  /* 鎖定背景，讓它不會隨著滑動而讓人眼花 */
+  background-attachment: fixed;
+  
+  /* 其他基本設定 */
   color: var(--text-color);
   min-height: 100vh;
   margin: 0;
   line-height: 1.6;
+}
+
+/* 💡 加碼建議：讓原本的卡片邊框更像漫畫 */
+.login-card, .landing-card, .bells-card, .action-card, .transaction-item {
+  border: 3px solid #000000 !important; /* 強制變黑框 */
+  box-shadow: 6px 6px 0 #000000 !important; /* 強制變黑影 */
 }
 
 .hidden {
