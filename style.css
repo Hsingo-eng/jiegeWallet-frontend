@@ -99,16 +99,26 @@ body {
 }
 
 .app-logo {
-  font-size: 3rem;
+  font-size: 0;
   background: transparent;
   color: var(--primary-green);
-  width: 80px;
-  height: 80px;
-  line-height: 80px;
+  width: 150px;
+  height: 150px;
+  line-height: 0;
   border-radius: 50%;
   margin: 0 auto 20px;
   box-shadow: none;
+  overflow: hidden;
+  padding: 0;
 }
+
+.app-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;  /* 圖片裁切填滿，不會被壓扁 */
+  border-radius: 50%; /* 跟容器一樣變圓形 */
+  display: block;     /* 消除圖片下方可能出現的微小留白 */
+} 
 
 .app-logo.small {
   width: 40px;
