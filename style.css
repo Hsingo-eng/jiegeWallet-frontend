@@ -21,20 +21,6 @@
   --shadow: 6px 6px 0 #1a1a1a;  /* 普普風硬陰影 */
 }
 
-
-body {
-    background-color: var(--primary-bg); 
-    
-    /* 套用設定的文字顏色 */
-    color: var(--text-color);
-    
-    /* 確保佔滿整個高度，避免背景色只有一半 */
-    min-height: 100vh;
-    margin: 0;
-}
-
-
-
 /* ===== Reset & Base ===== */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -44,13 +30,23 @@ body {
 
 body {
   font-family: 'Zen Maru Gothic', 'Varela Round', sans-serif;
-  background: var(--primary-bg);
-  /* 背景圖案 */
-  background-image: radial-gradient(#dcecc4 15%, transparent 16%), radial-gradient(#dcecc4 15%, transparent 16%);
+  
+  /* 1. 先設定底色 (使用具體屬性，不要用簡寫) */
+  background-color: var(--primary-bg);
+  
+  /* 2. 再設定圓點背景圖 */
+  /* 為了測試，我先把顏色加深一點點，確認有點點後再改回你的 #dcecc4 */
+  background-image: 
+      radial-gradient(#b8d695 15%, transparent 16%), 
+      radial-gradient(#b8d695 15%, transparent 16%);
+      
   background-size: 40px 40px;
   background-position: 0 0, 20px 20px;
+  
+  /* 3. 其他設定 */
   color: var(--text-color);
   min-height: 100vh;
+  margin: 0;
   line-height: 1.6;
 }
 
