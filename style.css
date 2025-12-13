@@ -31,19 +31,20 @@
 body {
   font-family: 'Zen Maru Gothic', 'Varela Round', sans-serif;
   
-  /* 1. 先設定底色 (使用具體屬性，不要用簡寫) */
+  /* 1. 底色：保留原本的漫畫紙黃色 */
   background-color: var(--primary-bg);
   
-  /* 2. 再設定圓點背景圖 */
-  /* 為了測試，我先把顏色加深一點點，確認有點點後再改回你的 #dcecc4 */
+  /* 2. 背景圖：改用更大、更明顯的漫畫圓點 (Ben-Day Dots) */
+  /* 使用半透明的藍色圓點，與黃底形成普普風撞色 */
   background-image: 
-      radial-gradient(#b8d695 15%, transparent 16%), 
-      radial-gradient(#b8d695 15%, transparent 16%);
+      radial-gradient(rgba(0, 102, 255, 0.15) 20%, transparent 20%), 
+      radial-gradient(rgba(0, 102, 255, 0.15) 20%, transparent 20%);
       
-  background-size: 40px 40px;
-  background-position: 0 0, 20px 20px;
+  /* 3. 圓點尺寸加大 */
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
   
-  /* 3. 其他設定 */
+  /* 其他設定 */
   color: var(--text-color);
   min-height: 100vh;
   margin: 0;
