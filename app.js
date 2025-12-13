@@ -153,7 +153,7 @@ function renderTransactions() {
   transactionList.innerHTML = sorted
     .map(
       (txn) => `
-      <div class="transaction-item">
+      <div class="transaction-item" onclick="window.viewTransaction('${txn.id}')" style="cursor: pointer;">
         <div class="left">
           <div class="category-icon" style="background-color: ${txn.category_color_hex || "#333"}; color: white;">
             ${txn.category_name ? txn.category_name.charAt(0) : "無"}
@@ -164,11 +164,11 @@ function renderTransactions() {
           </div>
         </div>
         <div class="right">
-          <span class="amount" style="font-size: 1rem; color: #555; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          <span class="amount" style="font-size: 1rem; color: #555; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             ${txn.amount || ""}
           </span>
-          <button class="edit-btn" onclick="window.editTransaction('${txn.id}')">✎</button>
-          <button class="delete-btn" onclick="window.deleteTransaction('${txn.id}')">✕</button>
+          <button class="edit-btn" onclick="event.stopPropagation(); window.editTransaction('${txn.id}')">✎</button>
+          <button class="delete-btn" onclick="event.stopPropagation(); window.deleteTransaction('${txn.id}')">✕</button>
         </div>
       </div>
     `
@@ -199,7 +199,7 @@ async function openBudgetModal() {
 async function openAddTransactionModal() {
   // 如果無法從後端讀到類別，就手動提供幾個選項
   const safeCategories = categories.length > 0 ? categories : [
-      {name: "有點好笑"}, {name: "很好笑"}, {name: "超好笑"}
+      {name: "有點好笑"}, {name: "很好笑"}, {name: "笑到歪腰"}
   ];
 
   const categoryOptions = safeCategories
@@ -338,3 +338,48 @@ async function init() {
 }
 
 init();
+
+// 🟢 新增：檢視詳細內容視窗
+window.viewTransaction = function (id) {
+  const txn = transactions.find((t) => t.id === id);
+  if (!txn) return;
+
+  Swal.fire({
+    title: txn.title || "無標題", // 標題顯示在最上面
+    html: `
+      <div style="text-align: left; font-size: 1.1rem; line-height: 1.8;">
+        <div style="margin-bottom: 15px; color: #888; font-size: 0.9rem; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+          📅 日期：${txn.date} <br>
+          🏷️ 類別：<span style="color: ${txn.category_color_hex || '#333'}; font-weight: bold;">${txn.category_name || txn.category}</span>
+        </div>
+        
+        <div style="
+            background-color: #f9f9f9; 
+            padding: 20px; 
+            border-radius: 15px; 
+            color: #333; 
+            font-weight: 500;
+            white-space: pre-wrap; /* 讓換行符號能正常顯示 */
+            max-height: 60vh;      /* 內容太長時可以捲動 */
+            overflow-y: auto;
+        ">
+          ${txn.amount} 
+        </div>
+      </div>
+    `,
+    width: 600, // 視窗寬度設寬一點
+    showCloseButton: true,
+    showConfirmButton: true,
+    confirmButtonText: "關閉",
+    confirmButtonColor: "#5abf98",
+    // 也可以加一個「編輯」按鈕在檢視視窗裡
+    showDenyButton: true,
+    denyButtonText: "✏️ 編輯",
+    denyButtonColor: "#74b9ff",
+  }).then((result) => {
+    // 如果使用者在檢視視窗按了「編輯」
+    if (result.isDenied) {
+      window.editTransaction(id);
+    }
+  });
+};

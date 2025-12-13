@@ -431,7 +431,8 @@ input:focus, select:focus {
 .list-container h3 {
   font-size: 1.1rem;
   margin-bottom: 16px;
-  color: #8b7d70;
+  color: #413c36;
+  background-color: #9ca095
   padding-left: 12px;
   border-left: 6px solid var(--primary-yellow);
   font-weight: 700;
