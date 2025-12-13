@@ -191,15 +191,40 @@ function renderTransactions() {
 }
 
 function updateSummary() {
+  // 1. 先取得目前的筆數
   const count = transactions.length;
+
+  // 2. 先把百分比算好 (放在最前面，這樣後面大家都能用)
+  let percent = count;
+  let safePercent = Math.min(percent, 100); // 最多 100%
+
+  // 3. 更新標題文字
   if(transactionListTitle) transactionListTitle.textContent = `近期紀錄 (共 ${count} 筆)`;
   
-  // 更新統計介面 (防止報錯)
+  // 4. 更新支出 (顯示筆數)
   if(totalExpense) totalExpense.textContent = count + " 筆";
-  if(budgetRemaining) budgetRemaining.textContent = "Happy!";
-  if(totalBudget) totalBudget.textContent = "無價";
-  if(budgetPercent) budgetPercent.textContent = "100%";
-  if(budgetProgressBar) budgetProgressBar.style.width = "100%";
+  
+  // 5. 更新中間的大字 (把 "count" 的引號拿掉，才會顯示數字)
+  if(budgetRemaining) budgetRemaining.textContent = count; 
+
+  // 6. 更新統計文字 (例如: 5 / 100)
+  if(totalBudget) totalBudget.textContent = count + " / 100";
+
+  // 7. 更新百分比文字 (例如: 5%)
+  if(budgetPercent) budgetPercent.textContent = `${safePercent}%`;
+  
+  // 8. 最後更新進度條 (這時候 safePercent 已經算好了，不會報錯)
+  if(budgetProgressBar) {
+      budgetProgressBar.style.width = `${safePercent}%`;
+      
+      // 設定顏色
+      budgetProgressBar.className = "progress-bar-fill"; // 重置
+      if (safePercent < 20) {
+        budgetProgressBar.classList.add("danger"); // 紅色
+      } else if (safePercent < 50) {
+        budgetProgressBar.classList.add("warning"); // 黃色
+      }
+  }
 }
 
 // ===== SweetAlert Flows =====

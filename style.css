@@ -617,7 +617,7 @@ div:where(.swal2-container) div:where(.swal2-popup) {
 
 .label-lg {
   display: block;
-  font-size: 1rem;
+  font-size:24px;
   font-weight: 700;
   color: #8b7d70;
   margin-bottom: 8px;
