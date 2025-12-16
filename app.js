@@ -324,6 +324,18 @@ async function openManageCategoryModal() {
 }
 
 // ===== CRUD Operations =====
+
+// 🟢 補上這個函式：新增交易
+async function createTransaction(payload) {
+  // payload 裡面包含了 date, category, title, amount
+  // 這會對應到後端的 app.post("/api/transactions")
+  return await api("/api/transactions", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// ... 接著才是原本的 openCategoryChartModal ...
 // 🟢 新功能：顯示類別統計圓餅圖
 async function openCategoryChartModal() {
   // 1. 先計算每個類別有幾筆
@@ -333,6 +345,7 @@ async function openCategoryChartModal() {
     "很好笑": 0,
     "笑到歪腰": 0
   };
+
 
   // 開始統計
   transactions.forEach(txn => {
