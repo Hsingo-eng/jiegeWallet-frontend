@@ -13,8 +13,17 @@
 }
 
 body {
-  /* 設定字型為 思源黑體，如果載入失敗則使用系統預設黑體 */
-  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
+  body, button, input, textarea, select, .swal2-popup {
+    font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif !important;
+    
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 額外確保回覆區塊的字型 (預防萬一) */
+.reply-box, .reply-content {
+    font-family: 'Noto Sans TC', sans-serif !important;
+}
     
   /* 讓字體渲染更滑順 (非必要，但推薦加) */
   -webkit-font-smoothing: antialiased;
@@ -591,8 +600,9 @@ div:where(.swal2-container) div:where(.swal2-popup) {
   border-radius: 30px !important;
   background: var(--card-bg) !important;
   border: 4px solid white !important;
-  font-family: 'Zen Maru Gothic', sans-serif !important;
+  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
 }
+
 
 .swal-form {
   text-align: left;
