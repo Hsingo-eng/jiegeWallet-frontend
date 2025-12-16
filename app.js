@@ -574,6 +574,50 @@ window.viewTransaction = function (id) {
          <div class="reply-content">${txn.reply}</div>
        </div>`
     : "";
+    // ===== Socket.io Notification =====
+// 連線到後端
+const socket = io(CONFIG.API_BASE_URL); // 確保 config.js 裡是 http://localhost:3000
+
+socket.on("connect", () => {
+    console.log("已連線到通知伺服器");
+});
+
+// 監聽後端的廣播
+socket.on("transaction_update", (data) => {
+    console.log("收到廣播:", data);
+
+    // 1. 播放通知音效 (選用)
+    // const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3');
+    // audio.play();
+
+    // 2. 跳出右上角小通知 (Toast)
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
+    let iconType = 'info';
+    if (data.type === 'add') iconType = 'success';
+    if (data.type === 'delete') iconType = 'warning';
+
+    Toast.fire({
+        icon: iconType,
+        title: data.msg
+    });
+
+    // 3. ✨ 最重要：自動重新讀取資料，讓畫面同步！
+    // 判斷一下，如果我正在登入狀態才更新
+    if (token) {
+        loadTransactions(); 
+    }
+});
 
   Swal.fire({
     title: txn.title || "無標題",
