@@ -13,8 +13,12 @@
 }
 
 body {
-    /* 英文用 Varela Round，中文用思源黑體，若都沒有就用系統黑體 */
-  font-family: 'Varela Round', 'Noto Sans TC', sans-serif;
+  /* 設定字型為 思源黑體，如果載入失敗則使用系統預設黑體 */
+  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
+    
+  /* 讓字體渲染更滑順 (非必要，但推薦加) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   
   /* 設定底色：亮黃色 */
   background-color: rgb(86, 86, 135);

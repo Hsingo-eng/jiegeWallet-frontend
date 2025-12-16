@@ -210,7 +210,7 @@ function updateSummary() {
   let safePercent = Math.min(percent, 100); // 最多 100%
 
   // 3. 更新標題文字
-  if(transactionListTitle) transactionListTitle.textContent = `近期紀錄 (共 ${count} 筆)`;
+  if(transactionListTitle) transactionListTitle.textContent = `所有紀錄 (共 ${count} 筆)`;
   
   // 4. 更新支出 (顯示筆數)
   if(totalExpense) totalExpense.textContent = count + " 筆";
