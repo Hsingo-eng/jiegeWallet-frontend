@@ -414,15 +414,113 @@ async function openCategoryChartModal() {
   });
 }
 
-// 編輯交易
+// ===== Update & Delete Operations =====
+// 編輯資料
 window.editTransaction = async function (id) {
+  // 1. 先找到原本的資料
   const txn = transactions.find((t) => t.id === id);
   if (!txn) return;
-  Swal.fire("提示", `內容：${txn.amount}\n(目前僅支援查看，修改請去 Google Sheet)`, "info");
+
+  // 2. 準備類別選項 (跟新增一樣)
+  const safeCategories = categories.length > 0 ? categories : [
+      {name: "有點好笑"}, {name: "很好笑"}, {name: "笑到歪腰"}
+  ];
+  const categoryOptions = safeCategories
+    .map((cat) => `<option value="${cat.name}" ${cat.name === txn.category_name ? "selected" : ""}>${cat.name}</option>`)
+    .join("");
+
+  // 3. 彈出編輯視窗 (預先填入舊資料)
+  const { value: formValues } = await Swal.fire({
+    title: "編輯紀錄",
+    html: `
+      <form id="swal-edit-form" class="swal-form">
+        <div class="form-group">
+          <label>日期</label>
+          <input type="date" id="edit-date" class="swal2-input" value="${txn.date}" required>
+        </div>
+        
+        <div class="form-group">
+          <label>類別</label>
+          <select id="edit-category" class="swal2-select">
+            ${categoryOptions}
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>標題</label>
+          <input type="text" id="edit-title" class="swal2-input" value="${txn.title || ''}" placeholder="標題" required>
+        </div>
+        
+        <div class="form-group">
+          <label>內容</label>
+          <input type="text" id="edit-amount" class="swal2-input" value="${txn.amount || ''}" placeholder="內容" required>
+        </div>
+      </form>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: "儲存修改",
+    cancelButtonText: "取消",
+    confirmButtonColor: "#5abf98",
+    preConfirm: () => {
+      return {
+        date: document.getElementById("edit-date").value,
+        category: document.getElementById("edit-category").value, // 對應後端的 'categories'
+        title: document.getElementById("edit-title").value,
+        amount: document.getElementById("edit-amount").value      // 對應後端的 'text'
+      };
+    },
+  });
+
+  // 4. 如果使用者按下儲存
+  if (formValues) {
+    Swal.fire({ title: "更新中...", didOpen: () => Swal.showLoading() });
+
+    try {
+      // 呼叫 PUT API
+      await api(`/api/transactions/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(formValues),
+      });
+      
+      await loadTransactions(); // 重新讀取清單
+      Swal.fire("成功", "資料已更新！", "success");
+    } catch (error) {
+      Swal.fire("失敗", error.message, "error");
+    }
+  }
 };
 
+// 刪除紀錄
 window.deleteTransaction = async function (id) {
-    Swal.fire("提示", "請直接去 Google Sheet 刪除該行資料喔！", "info");
+  // 1. 跳出確認視窗
+  const result = await Swal.fire({
+    title: "確定要刪除嗎？",
+    text: "刪掉就救不回來囉（要去 Google Sheet 垃圾桶找）",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d63031",
+    cancelButtonColor: "#b2bec3",
+    confirmButtonText: "刪除",
+    cancelButtonText: "算了"
+  });
+
+  // 2. 如果確認刪除
+  if (result.isConfirmed) {
+    Swal.fire({ title: "刪除中...", didOpen: () => Swal.showLoading() });
+
+    try {
+      // 呼叫 DELETE API
+      await api(`/api/transactions/${id}`, {
+        method: "DELETE"
+      });
+
+      await loadTransactions(); // 重新讀取清單
+      Swal.fire("已刪除", "該筆紀錄已移除。", "success");
+    } catch (error) {
+      Swal.fire("刪除失敗", error.message, "error");
+    }
+  }
 };
 
 // ===== Event Listeners =====
